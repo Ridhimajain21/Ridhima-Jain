@@ -1,0 +1,590 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+void printWelcomeMessage();
+int chooseLevel();
+void playGame(int maxAttempts, int range);
+int main() {
+    int playAgain = 1;
+
+    printWelcomeMessage();
+
+    while (playAgain) {
+        int level = chooseLevel();
+        int maxAttempts, range;
+
+        // Configure game settings based on level
+        switch (level) {
+            case 1:
+                maxAttempts = 10;
+                range = 50;
+                break;
+            case 2:
+                maxAttempts = 7;
+                range = 100;
+                break;
+            case 3:
+                maxAttempts = 5;
+                range = 200;
+                break;
+            default:
+                printf("Invalid level. Exiting.\n");
+                return 1;
+        }
+
+        playGame(maxAttempts, range);
+
+        printf("\nDo you want to play again? (1 for Yes, 0 for No): ");
+        scanf("%d", &playAgain);
+    }
+
+    printf("\nThank you for playing! Goodbye!\n");
+    return 0;
+}
+
+void printWelcomeMessage() {
+    printf("==========================================\n");
+    printf("       Welcome to the Guess the Number Game!       \n");
+    printf("==========================================\n");
+    printf("Instructions:\n");
+    printf("- The computer will generate a random number.\n");
+    printf("- Your goal is to guess the number within a limited number of attempts.\n");
+    printf("==========================================\n\n");
+}
+
+int chooseLevel() {
+    int level;
+
+    printf("Choose a difficulty level:\n");
+    printf("1. Easy (Range: 1-50, Attempts: 10)\n");
+    printf("2. Medium (Range: 1-100, Attempts: 7)\n");
+    printf("3. Hard (Range: 1-200, Attempts: 5)\n");
+    printf("Enter your choice (1-3): ");
+    scanf("%d", &level);
+
+    return level;
+}
+
+void playGame(int maxAttempts, int range) {
+    int target, guess, attempts = 0;
+    int guessedCorrectly = 0;
+
+    // Initialize random number generator
+    srand(time(0));
+    target = (rand() % range) + 1;
+
+    printf("\nA number between 1 and %d has been generated. Start guessing!\n", range);
+
+    while (attempts < maxAttempts) {
+        printf("\nAttempt %d/%d: Enter your guess: ", attempts + 1, maxAttempts);
+        scanf("%d", &guess);
+
+        attempts++;
+
+        if (guess == target) {
+            guessedCorrectly = 1;
+            break;
+        } else if (guess < target) {
+            printf("Too low! Try again.\n");
+        } else {
+            printf("Too high! Try again.\n");
+        }
+    }
+
+    if (guessedCorrectly) {
+        printf("\nCongratulations! You guessed the correct number %d in %d attempts!\n", target, attempts);
+    } else {
+        printf("\nGame Over! You've used all your attempts. The correct number was %d.\n", target);
+    }
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+
+#define BOARD_SIZE 100
+#define NUM_PLAYERS 4
+#define MAX_NAME_LENGTH 50
+
+void printWelcomeMessage();
+void initializeBoard(int board[]);
+void displayBoard(int positions[], int numPlayers);
+int rollDice();
+void playLudo();
+
+int main() {
+    printWelcomeMessage();
+    playLudo();
+    return 0;
+}
+
+void printWelcomeMessage() {
+    printf("==========================================\n");
+    printf("         Welcome to the Ludo Game!         \n");
+    printf("==========================================\n\n");
+    printf("Instructions:\n");
+    printf("- Each player rolls a dice and moves their token on the board.\n");
+    printf("- The goal is to reach the end of the board (square 100).\n");
+    printf("- If a player lands on a snake, they slide down.\n");
+    printf("- If a player lands on a ladder, they climb up.\n");
+    printf("==========================================\n\n");
+}
+
+void initializeBoard(int board[]) {
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        board[i] = i + 1;
+    }
+
+    // Add snakes
+    board[16] = 6;
+    board[47] = 26;
+    board[49] = 11;
+    board[56] = 53;
+    board[62] = 19;
+    board[87] = 24;
+    board[93] = 73;
+    board[95] = 75;
+    board[98] = 78;
+
+    // Add ladders
+    board[1] = 38;
+    board[4] = 14;
+    board[9] = 31;
+    board[21] = 42;
+    board[28] = 84;
+    board[36] = 44;
+    board[51] = 67;
+    board[71] = 91;
+    board[80] = 100;
+}
+
+int rollDice() {
+    return (rand() % 6) + 1;
+}
+
+void displayBoard(int positions[], int numPlayers) {
+    printf("\nCurrent Positions:\n");
+    for (int i = 0; i < numPlayers; i++) {
+        printf("Player %d: Position %d\n", i + 1, positions[i]);
+    }
+    printf("==========================================\n");
+}
+
+void playLudo() {
+    int board[BOARD_SIZE];
+    int positions[NUM_PLAYERS] = {0};
+    int playerTurn = 0;
+    int winner = -1;
+    char playerNames[NUM_PLAYERS][MAX_NAME_LENGTH];
+
+    initializeBoard(board);
+    srand(time(0));
+
+    printf("Enter player names:\n");
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        printf("Player %d: ", i + 1);
+        scanf("%s", playerNames[i]);
+    }
+
+    printf("\nGame start!\n\n");
+
+    while (winner == -1) {
+        printf("%s's turn.\n", playerNames[playerTurn]);
+        int dice = rollDice();
+        printf("You rolled a %d.\n", dice);
+
+        positions[playerTurn] += dice;
+        if (positions[playerTurn] >= BOARD_SIZE) {
+            positions[playerTurn] = BOARD_SIZE;
+            winner = playerTurn;
+            break;
+        }
+
+        positions[playerTurn] = board[positions[playerTurn] - 1];
+        printf("%s is now at position %d.\n\n", playerNames[playerTurn], positions[playerTurn]);
+
+        displayBoard(positions, NUM_PLAYERS);
+
+        if (positions[playerTurn] == BOARD_SIZE) {
+            winner = playerTurn;
+            break;
+        }
+
+        playerTurn = (playerTurn + 1) % NUM_PLAYERS;
+    }
+
+    printf("\nCongratulations! %s wins the game!\n", playerNames[winner]);
+}
+
+
+
+
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+void printWelcomeMessage();
+void displayMenu();
+void performOperation(int choice);
+
+int main() {
+    int choice;
+
+    printWelcomeMessage();
+
+    do {
+        displayMenu();
+        printf("Enter your choice (0 to exit): ");
+        scanf("%d", &choice);
+
+        if (choice == 0) {
+            printf("Exiting calculator. Goodbye!\n");
+            break;
+        }
+
+        performOperation(choice);
+    } while (1);
+
+    return 0;
+}
+
+void printWelcomeMessage() {
+    printf("==========================================\n");
+    printf("      Welcome to the Scientific Calculator      \n");
+    printf("==========================================\n\n");
+}
+
+void displayMenu() {
+    printf("\nScientific Calculator Menu:\n");
+    printf("1. Addition\n");
+    printf("2. Subtraction\n");
+    printf("3. Multiplication\n");
+    printf("4. Division\n");
+    printf("5. Power\n");
+    printf("6. Square Root\n");
+    printf("7. Logarithm (base 10)\n");
+    printf("8. Natural Logarithm (ln)\n");
+    printf("9. Sine\n");
+    printf("10. Cosine\n");
+    printf("11. Tangent\n");
+    printf("==========================================\n");
+}
+
+void performOperation(int choice) {
+    double num1, num2, result;
+
+    switch (choice) {
+        case 1:
+            printf("Enter two numbers for addition: ");
+            scanf("%lf %lf", &num1, &num2);
+            result = num1 + num2;
+            printf("Result: %.2lf\n", result);
+            break;
+        case 2:
+            printf("Enter two numbers for subtraction: ");
+            scanf("%lf %lf", &num1, &num2);
+            result = num1 - num2;
+            printf("Result: %.2lf\n", result);
+            break;
+        case 3:
+            printf("Enter two numbers for multiplication: ");
+            scanf("%lf %lf", &num1, &num2);
+            result = num1 * num2;
+            printf("Result: %.2lf\n", result);
+            break;
+        case 4:
+            printf("Enter two numbers for division: ");
+            scanf("%lf %lf", &num1, &num2);
+            if (num2 != 0) {
+                result = num1 / num2;
+                printf("Result: %.2lf\n", result);
+            } else {
+                printf("Error: Division by zero is undefined.\n");
+            }
+            break;
+        case 5:
+            printf("Enter base and exponent: ");
+            scanf("%lf %lf", &num1, &num2);
+            result = pow(num1, num2);
+            printf("Result: %.2lf\n", result);
+            break;
+        case 6:
+            printf("Enter a number for square root: ");
+            scanf("%lf", &num1);
+            if (num1 >= 0) {
+                result = sqrt(num1);
+                printf("Result: %.2lf\n", result);
+            } else {
+                printf("Error: Square root of negative number is undefined.\n");
+            }
+            break;
+        case 7:
+            printf("Enter a number for logarithm (base 10): ");
+            scanf("%lf", &num1);
+            if (num1 > 0) {
+                result = log10(num1);
+                printf("Result: %.2lf\n", result);
+            } else {
+                printf("Error: Logarithm of non-positive number is undefined.\n");
+            }
+            break;
+        case 8:
+            printf("Enter a number for natural logarithm (ln): ");
+            scanf("%lf", &num1);
+            if (num1 > 0) {
+                result = log(num1);
+                printf("Result: %.2lf\n", result);
+            } else {
+                printf("Error: Natural logarithm of non-positive number is undefined.\n");
+            }
+            break;
+        case 9:
+            printf("Enter an angle in degrees for sine: ");
+            scanf("%lf", &num1);
+            result = sin(num1 * M_PI / 180.0);
+            printf("Result: %.2lf\n", result);
+            break;
+        case 10:
+            printf("Enter an angle in degrees for cosine: ");
+            scanf("%lf", &num1);
+            result = cos(num1 * M_PI / 180.0);
+            printf("Result: %.2lf\n", result);
+            break;
+        case 11:
+            printf("Enter an angle in degrees for tangent: ");
+            scanf("%lf", &num1);
+            result = tan(num1 * M_PI / 180.0);
+            printf("Result: %.2lf\n", result);
+            break;
+        default:
+            printf("Invalid choice. Please try again.\n");
+            break;
+    }
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_BOOKS 100
+#define MAX_TITLE 100
+#define MAX_AUTHOR 100
+#define MAX_USERS 50
+
+// Structures
+typedef struct {
+    int id;
+    char title[MAX_TITLE];
+    char author[MAX_AUTHOR];
+    int available;
+} Book;
+
+typedef struct {
+    int id;
+    char name[MAX_AUTHOR];
+    int borrowedBookId;
+} User;
+
+// Global Variables
+Book library[MAX_BOOKS];
+User users[MAX_USERS];
+int bookCount = 0;
+int userCount = 0;
+
+// Function Prototypes
+void printWelcomeMessage();
+void displayMenu();
+void addBook();
+void listBooks();
+void addUser();
+void listUsers();
+void borrowBook();
+void returnBook();
+
+int main() {
+    int choice;
+
+    printWelcomeMessage();
+
+    do {
+        displayMenu();
+        printf("Enter your choice (0 to exit): ");
+        scanf("%d", &choice);
+        getchar(); // Consume newline
+
+        switch (choice) {
+            case 0:
+                printf("Exiting Library Management System. Goodbye!\n");
+                break;
+            case 1:
+                addBook();
+                break;
+            case 2:
+                listBooks();
+                break;
+            case 3:
+                addUser();
+                break;
+            case 4:
+                listUsers();
+                break;
+            case 5:
+                borrowBook();
+                break;
+            case 6:
+                returnBook();
+                break;
+            default:
+                printf("Invalid choice. Please try again.\n");
+        }
+    } while (choice != 0);
+
+    return 0;
+}
+
+void printWelcomeMessage() {
+    printf("==========================================\n");
+    printf("      Welcome to the Library Management System      \n");
+    printf("==========================================\n\n");
+}
+
+void displayMenu() {
+    printf("\nLibrary Management Menu:\n");
+    printf("1. Add a Book\n");
+    printf("2. List All Books\n");
+    printf("3. Add a User\n");
+    printf("4. List All Users\n");
+    printf("5. Borrow a Book\n");
+    printf("6. Return a Book\n");
+    printf("==========================================\n");
+}
+
+void addBook() {
+    if (bookCount >= MAX_BOOKS) {
+        printf("Library is full! Cannot add more books.\n");
+        return;
+    }
+
+    Book newBook;
+    newBook.id = bookCount + 1;
+
+    printf("Enter book title: ");
+    fgets(newBook.title, MAX_TITLE, stdin);
+    newBook.title[strcspn(newBook.title, "\n")] = '\0';
+
+    printf("Enter book author: ");
+    fgets(newBook.author, MAX_AUTHOR, stdin);
+    newBook.author[strcspn(newBook.author, "\n")] = '\0';
+
+    newBook.available = 1;
+    library[bookCount++] = newBook;
+
+    printf("Book added successfully!\n");
+}
+
+void listBooks() {
+    if (bookCount == 0) {
+        printf("No books available in the library.\n");
+        return;
+    }
+
+    printf("\nList of Books:\n");
+    for (int i = 0; i < bookCount; i++) {
+        printf("ID: %d, Title: %s, Author: %s, Status: %s\n",
+               library[i].id, library[i].title, library[i].author,
+               library[i].available ? "Available" : "Borrowed");
+    }
+}
+
+void addUser() {
+    if (userCount >= MAX_USERS) {
+        printf("Maximum user limit reached! Cannot add more users.\n");
+        return;
+    }
+
+    User newUser;
+    newUser.id = userCount + 1;
+
+    printf("Enter user name: ");
+    fgets(newUser.name, MAX_AUTHOR, stdin);
+    newUser.name[strcspn(newUser.name, "\n")] = '\0';
+
+    newUser.borrowedBookId = -1;
+    users[userCount++] = newUser;
+
+    printf("User added successfully!\n");
+}
+
+void listUsers() {
+    if (userCount == 0) {
+        printf("No users registered in the library.\n");
+        return;
+    }
+
+    printf("\nList of Users:\n");
+    for (int i = 0; i < userCount; i++) {
+        printf("ID: %d, Name: %s, Borrowed Book ID: %d\n",
+               users[i].id, users[i].name, users[i].borrowedBookId);
+    }
+}
+
+void borrowBook() {
+    int userId, bookId;
+
+    printf("Enter user ID: ");
+    scanf("%d", &userId);
+    getchar();
+
+    if (userId < 1 || userId > userCount) {
+        printf("Invalid user ID!\n");
+        return;
+    }
+
+    if (users[userId - 1].borrowedBookId != -1) {
+        printf("User already borrowed a book!\n");
+        return;
+    }
+
+    printf("Enter book ID: ");
+    scanf("%d", &bookId);
+    getchar();
+
+    if (bookId < 1 || bookId > bookCount || !library[bookId - 1].available) {
+        printf("Invalid book ID or book not available!\n");
+        return;
+    }
+
+    library[bookId - 1].available = 0;
+    users[userId - 1].borrowedBookId = bookId;
+
+    printf("Book borrowed successfully!\n");
+}
+
+void returnBook() {
+    int userId;
+
+    printf("Enter user ID: ");
+    scanf("%d", &userId);
+    getchar();
+
+    if (userId < 1 || userId > userCount) {
+        printf("Invalid user ID!\n");
+        return;
+    }
+
+    if (users[userId - 1].borrowedBookId == -1) {
+        printf("User has not borrowed any book!\n");
+        return;
+    }
+
+    int bookId = users[userId - 1].borrowedBookId;
+    library[bookId - 1].available = 1;
+    users[userId - 1].borrowedBookId = -1;
+
+    printf("Book returned successfully!\n");
+}
